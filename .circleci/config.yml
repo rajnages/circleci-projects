@@ -11,7 +11,7 @@ environment:
   DOCKER_REGISTRY: "docker.io"
   IMAGE_NAME: "rajnages/circleci-app"
   NODE_ENV: "production"
-  DOCKER_TAG: "latest"
+  DOCKER_TAG: "latest"  # Ensure this is properly set or use a fallback mechanism if needed
 
 # Define jobs
 jobs:
@@ -40,8 +40,7 @@ jobs:
           command: |
             cd app
             echo "Building Docker image..."
-            docker build -t $IMAGE_NAME/$DOCKER_TAG -f Dockerfile .
-    # docker build -t rajnages/circleci-app:latest
+            docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$DOCKER_TAG -f Dockerfile .
 
   testing:
     executor: docker-executor
@@ -68,13 +67,13 @@ jobs:
           command: |
             cd app
             echo "Pushing Docker image to registry..."
-            docker push $IMAGE_NAME/$DOCKER_TAG
+            docker push $DOCKER_USERNAME/$IMAGE_NAME:$DOCKER_TAG
       - run:
           name: Tag Docker image for deployment
           command: |
             cd app
-            docker tag $IMAGE_NAME:$DOCKER_TAG $IMAGE_NAME:$CIRCLE_BRANCH
-            docker push $IMAGE_NAME:$CIRCLE_BRANCH
+            docker tag $DOCKER_USERNAME/$IMAGE_NAME:$DOCKER_TAG $DOCKER_USERNAME/$IMAGE_NAME:$CIRCLE_BRANCH
+            docker push $DOCKER_USERNAME/$IMAGE_NAME:$CIRCLE_BRANCH
 
 # Define workflows
 workflows:
