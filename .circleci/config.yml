@@ -4,8 +4,11 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: node:latest
-    working_directory: /app
+      - image: circleci/python:3.8  # You can use another base image if needed
+    working_directory: ~/app
+    environment:
+      DOCKER_HOST: "tcp://localhost:2375"  # Configure Docker to use the TCP port (DinD)
+    auth: true  # Enable Docker authentication
 
 # Define environment variables
 environment:
@@ -18,65 +21,52 @@ environment:
 jobs:
   building:
     executor: docker-executor
+    docker:
+      - image: node:latest
     steps:
       - checkout
-      - run:
-          name: List files after checkout
-          command: |
-            echo "Listing files in current directory:"
-            ls -al  # List files to verify the checkout
-            ls -lrta  # List files sorted by time to check their timestamps
-            # If app is a subdirectory, uncomment the line below to check its contents:
-            # cd app && ls -al
-
       - run:
           name: Install dependencies
           command: |
             echo "Installing dependencies..."
-            # If `package.json` is in the root, don't need `cd app`
-            cd app
             npm install
 
       - run:
           name: Build Docker image
           command: |
-            cd app
-            echo "Installing Docker..."
-            curl https://get.docker.com | bash
             echo "Building Docker image..."
             docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG .
 
   testing:
     executor: docker-executor
+    docker:
+      - image: node:latest
     steps:
       - checkout
       - run:
           name: Run tests
           command: |
-            cd app
             echo "Running tests..."
-            # Same as above, if `package.json` is in the root, no need to `cd app`
             npm test
 
   deploying:
     executor: docker-executor
+    docker:
+      - image: node:latest
     steps:
       - checkout
       - run:
           name: Log in to Docker Hub
           command: |
-            cd app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Push Docker image to Docker Hub
           command: |
-            cd app
             echo "Pushing Docker image to registry..."
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
       - run:
           name: Tag Docker image for deployment
           command: |
-            cd app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
