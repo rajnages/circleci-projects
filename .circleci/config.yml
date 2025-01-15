@@ -20,11 +20,14 @@ jobs:
     steps:
       - checkout
       - run:
-            name: Checking files inside folders
-            command: |
-                echo "Checking files inside folders..."
-                ls -l
-                cd app && ls -lrta
+          name: Checking files inside folders
+          command: |
+            echo "Checking files inside folders..."
+            ls -l
+            cd app && ls -lrta
+      - run:
+          name: Check Docker username
+          command: echo "Docker username is $DOCKER_USERNAME"
       - run:
           name: Install dependencies
           command: |
