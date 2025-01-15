@@ -1,13 +1,27 @@
 version: 2.1
 
 jobs:
-  hello-job:
-    machine: true
+  building:
+    docker:
+      - image: node:latest
     steps:
-      - checkout # check out the code in the project directory
-      - run: echo "hello world" # run the `echo` command
-
+      - checkout
+      - run: echo "Hello world"
+  testing:
+    docker:
+      - image: node:latest
+    steps:
+      - checkout
+      - run: echo "Hello world"
+  deploying:
+    docker:
+      - image: node:latest
+    steps:
+      - checkout
+      - run: echo "Hello world"
 workflows:
   my-workflow:
     jobs:
-      - hello-job
+      - building
+      - testing
+      - deploying
