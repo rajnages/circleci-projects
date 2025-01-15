@@ -1,27 +1,87 @@
 version: 2.1
 
+# Define reusable Docker executor
+executors:
+  docker-executor:
+    docker:
+      - image: node:latest
+    working_directory: ~/app
+
+# Define environment variables (use CircleCI Project Settings for sensitive data)
+# These can be set in your CircleCI project settings, or defined here for demonstration purposes
+environment:
+  DOCKER_REGISTRY: "docker.io"
+  IMAGE_NAME: "rajnages/circleci-app"
+  NODE_ENV: "production" # Default environment is production
+  DOCKER_TAG: "latest" # Default tag for Docker image
+
+# Define jobs
 jobs:
   building:
-    docker:
-      - image: node:latest
+    executor: docker-executor
     steps:
       - checkout
-      - run: echo "Hello world"
+      # Install dependencies using npm
+      - run:
+          name: Install dependencies
+          command: |
+            echo "Installing dependencies..."
+            npm install
+      # Build Docker image
+      - run:
+          name: Build Docker image
+          command: |
+            echo "Building Docker image..."
+            docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG .
+
   testing:
-    docker:
-      - image: node:latest
+    executor: docker-executor
     steps:
       - checkout
-      - run: echo "Hello world"
+      # Run tests
+      - run:
+          name: Run tests
+          command: |
+            echo "Running tests..."
+            npm test
+      # Optionally, you could set the NODE_ENV for specific environments
+      - run:
+          name: Set environment for testing
+          command: |
+            export NODE_ENV=test
+            echo "Test environment set to $NODE_ENV"
+
   deploying:
-    docker:
-      - image: node:latest
+    executor: docker-executor
     steps:
       - checkout
-      - run: echo "Hello world"
+      # Log in to Docker Hub
+      - run:
+          name: Log in to Docker Hub
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      # Push Docker image to Docker Hub
+      - run:
+          name: Push Docker image to Docker Hub
+          command: |
+            echo "Pushing Docker image to registry..."
+            docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
+      # You can change the image tag based on the environment
+      - run:
+          name: Tag Docker image for deployment
+          command: |
+            docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
+            docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
+
+# Define workflows
 workflows:
+  version: 2
   my-workflow:
     jobs:
       - building
-      - testing
-      - deploying
+      - testing:
+          requires:
+            - building
+      - deploying:
+          requires:
+            - testing
