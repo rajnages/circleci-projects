@@ -1,8 +1,12 @@
 version: 2.1
 
 # Define reusable Docker executor
+# Define reusable machine executor
 executors:
   docker-executor:
+    # machine-executor:
+    # machine: true
+    # - image: ubuntu*
     docker:
       - image: node:latest
     working_directory: ~/app
