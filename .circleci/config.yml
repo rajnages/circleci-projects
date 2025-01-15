@@ -21,10 +21,15 @@ jobs:
     steps:
       - checkout
       - run:
+          name: List files after checkout
+          command: |
+            echo "Listing files in current directory:"
+            ls -al
+      - run:
           name: Install dependencies
           command: |
             echo "Installing dependencies..."
-            cd /root/app
+            cd ~/app  # Ensure this is the correct path
             npm install
       - run:
           name: Build Docker image
@@ -40,7 +45,7 @@ jobs:
           name: Run tests
           command: |
             echo "Running tests..."
-            cd /root/app
+            cd ~/app
             npm test
 
   deploying:
@@ -50,18 +55,18 @@ jobs:
       - run:
           name: Log in to Docker Hub
           command: |
-            cd /root/app
+            cd ~/app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Push Docker image to Docker Hub
           command: |
             echo "Pushing Docker image to registry..."
-            cd /root/app
+            cd ~/app
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
       - run:
           name: Tag Docker image for deployment
           command: |
-            cd /root/app
+            cd ~/app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
