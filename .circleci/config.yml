@@ -73,8 +73,8 @@ jobs:
           name: Tag Docker image for deployment
           command: |
             cd app
-            docker tag rajnages/circle-app:latest rajnages/circle-app:main
-            docker push rajnages/circle-app:main
+            docker tag rajnages/circle-app:latest
+            docker push rajnages/circle-app:latest
 
 # Define workflows
 workflows:
