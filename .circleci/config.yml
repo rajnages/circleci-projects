@@ -67,14 +67,16 @@ jobs:
           name: Push Docker image to Docker Hub
           command: |
             cd app
+            echo "Checking docker images"
+            docker image ls
             echo "Pushing Docker image to registry..."
             docker push rajnages/circle-app:latest
-      - run:
-          name: Tag Docker image for deployment
-          command: |
-            cd app
-            docker tag rajnages/circle-app:latest
-            docker push rajnages/circle-app:latest
+    #   - run:
+    #       name: Tag Docker image for deployment
+    #       command: |
+    #         cd app
+    #         docker tag rajnages/circle-app:latest
+    #         docker push rajnages/circle-app:latest
 
 # Define workflows
 workflows:
