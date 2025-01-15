@@ -30,6 +30,7 @@ jobs:
           name: Install dependencies
           command: |
             echo "Installing dependencies..."
+            cd /home/circleci/app
             npm install
       # Build Docker image
       - run:
@@ -47,6 +48,7 @@ jobs:
           name: Run tests
           command: |
             echo "Running tests..."
+            cd /home/circleci/app
             npm test
       # Optionally, you could set the NODE_ENV for specific environments
       - run:
@@ -63,17 +65,20 @@ jobs:
       - run:
           name: Log in to Docker Hub
           command: |
+            cd /home/circleci/app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       # Push Docker image to Docker Hub
       - run:
           name: Push Docker image to Docker Hub
           command: |
             echo "Pushing Docker image to registry..."
+            cd /home/circleci/app
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
       # You can change the image tag based on the environment
       - run:
           name: Tag Docker image for deployment
           command: |
+            cd /home/circleci/app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
