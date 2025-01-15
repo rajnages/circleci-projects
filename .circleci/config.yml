@@ -1,23 +1,18 @@
 version: 2.1
 
 # Define reusable Docker executor
-# Define reusable machine executor
 executors:
   docker-executor:
-    # machine-executor:
-    # machine: true
-    # - image: ubuntu*
     docker:
       - image: node:latest
     working_directory: ~/app
 
-# Define environment variables (use CircleCI Project Settings for sensitive data)
-# These can be set in your CircleCI project settings, or defined here for demonstration purposes
+# Define environment variables
 environment:
   DOCKER_REGISTRY: "docker.io"
   IMAGE_NAME: "rajnages/circleci-app"
-  NODE_ENV: "production" # Default environment is production
-  DOCKER_TAG: "latest" # Default tag for Docker image
+  NODE_ENV: "production"
+  DOCKER_TAG: "latest"
 
 # Define jobs
 jobs:
@@ -25,14 +20,12 @@ jobs:
     executor: docker-executor
     steps:
       - checkout
-      # Install dependencies using npm
       - run:
           name: Install dependencies
           command: |
             echo "Installing dependencies..."
-            cd ~/app
+            cd /root/app
             npm install
-      # Build Docker image
       - run:
           name: Build Docker image
           command: |
@@ -43,42 +36,32 @@ jobs:
     executor: docker-executor
     steps:
       - checkout
-      # Run tests
       - run:
           name: Run tests
           command: |
             echo "Running tests..."
-            cd ~/app
+            cd /root/app
             npm test
-      # Optionally, you could set the NODE_ENV for specific environments
-      - run:
-          name: Set environment for testing
-          command: |
-            export NODE_ENV=test
-            echo "Test environment set to $NODE_ENV"
 
   deploying:
     executor: docker-executor
     steps:
       - checkout
-      # Log in to Docker Hub
       - run:
           name: Log in to Docker Hub
           command: |
-            cd ~/app
+            cd /root/app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      # Push Docker image to Docker Hub
       - run:
           name: Push Docker image to Docker Hub
           command: |
             echo "Pushing Docker image to registry..."
-            cd ~/app
+            cd /root/app
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
-      # You can change the image tag based on the environment
       - run:
           name: Tag Docker image for deployment
           command: |
-            cd ~/app
+            cd /root/app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
