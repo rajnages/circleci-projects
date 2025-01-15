@@ -3,8 +3,7 @@ version: 2.1
 # Define reusable Docker executor
 executors:
   docker-executor:
-    machine: true
-      #- image: circleci/python:3.8  # You can use another base image if needed
+    machine: true  # Use machine executor to get access to Docker
     working_directory: ~/app
 
 # Define environment variables
@@ -18,8 +17,6 @@ environment:
 jobs:
   building:
     executor: docker-executor
-    docker:
-      - image: node:latest
     steps:
       - checkout
       - run:
@@ -36,8 +33,6 @@ jobs:
 
   testing:
     executor: docker-executor
-    docker:
-      - image: node:latest
     steps:
       - checkout
       - run:
@@ -48,8 +43,6 @@ jobs:
 
   deploying:
     executor: docker-executor
-    docker:
-      - image: node:latest
     steps:
       - checkout
       - run:
