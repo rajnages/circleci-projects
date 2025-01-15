@@ -3,12 +3,9 @@ version: 2.1
 # Define reusable Docker executor
 executors:
   docker-executor:
-    docker:
-      - image: circleci/python:3.8  # You can use another base image if needed
+    machine: true
+      #- image: circleci/python:3.8  # You can use another base image if needed
     working_directory: ~/app
-    environment:
-      DOCKER_HOST: "tcp://localhost:2375"  # Configure Docker to use the TCP port (DinD)
-    auth: true  # Enable Docker authentication
 
 # Define environment variables
 environment:
