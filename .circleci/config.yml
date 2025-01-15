@@ -40,7 +40,7 @@ jobs:
           command: |
             cd app
             echo "Building Docker image..."
-            docker build -t rajnages/circle-app:latest -f Dockerfile .
+            docker build -t rajnages/circle-app:1.0 -f Dockerfile .
             docker image ls
 
   testing:
@@ -62,7 +62,7 @@ jobs:
           name: Log in to Docker Hub
           command: |
             cd app
-            docker build -t rajnages/circle-app:latest -f Dockerfile .
+            docker build -t rajnages/circle-app:1.0 -f Dockerfile .
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Push Docker image to Docker Hub
@@ -71,7 +71,7 @@ jobs:
             echo "Checking docker images"
             docker image ls
             echo "Pushing Docker image to registry..."
-            docker push rajnages/circle-app:latest
+            docker push rajnages/circle-app:1.0
     #   - run:
     #       name: Tag Docker image for deployment
     #       command: |
