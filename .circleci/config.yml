@@ -24,19 +24,23 @@ jobs:
           name: List files after checkout
           command: |
             echo "Listing files in current directory:"
-            ls -al
-            cd app
-            ls -lrta
+            ls -al  # List files to verify the checkout
+            ls -lrta  # List files sorted by time to check their timestamps
+            # If app is a subdirectory, uncomment the line below to check its contents:
+            # cd app && ls -al
 
       - run:
           name: Install dependencies
           command: |
             echo "Installing dependencies..."
-            cd app  # Ensure this is the correct path
+            # If `package.json` is in the root, don't need `cd app`
             npm install
+
       - run:
           name: Build Docker image
           command: |
+            echo "Installing Docker..."
+            curl https://get.docker.com | bash
             echo "Building Docker image..."
             docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG .
 
@@ -48,7 +52,7 @@ jobs:
           name: Run tests
           command: |
             echo "Running tests..."
-            cd app
+            # Same as above, if `package.json` is in the root, no need to `cd app`
             npm test
 
   deploying:
@@ -58,18 +62,15 @@ jobs:
       - run:
           name: Log in to Docker Hub
           command: |
-            cd app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Push Docker image to Docker Hub
           command: |
             echo "Pushing Docker image to registry..."
-            cd app
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
       - run:
           name: Tag Docker image for deployment
           command: |
-            cd app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
