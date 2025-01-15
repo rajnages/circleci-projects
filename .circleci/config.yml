@@ -5,7 +5,7 @@ executors:
   docker-executor:
     docker:
       - image: node:latest
-    working_directory: ~/app
+    working_directory: /app
 
 # Define environment variables
 environment:
@@ -34,11 +34,13 @@ jobs:
           command: |
             echo "Installing dependencies..."
             # If `package.json` is in the root, don't need `cd app`
+            cd app
             npm install
 
       - run:
           name: Build Docker image
           command: |
+            cd app
             echo "Installing Docker..."
             curl https://get.docker.com | bash
             echo "Building Docker image..."
@@ -51,6 +53,7 @@ jobs:
       - run:
           name: Run tests
           command: |
+            cd app
             echo "Running tests..."
             # Same as above, if `package.json` is in the root, no need to `cd app`
             npm test
@@ -62,15 +65,18 @@ jobs:
       - run:
           name: Log in to Docker Hub
           command: |
+            cd app
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Push Docker image to Docker Hub
           command: |
+            cd app
             echo "Pushing Docker image to registry..."
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG
       - run:
           name: Tag Docker image for deployment
           command: |
+            cd app
             docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
             docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CIRCLE_BRANCH
 
